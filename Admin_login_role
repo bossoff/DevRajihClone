@@ -1,0 +1,153 @@
+<?php
+/*~ 
+.---------------------------------------------------------------------------.
+|  Software: DevRajihClone - PHP Staff Login class                          |
+|   Version: 6.1                                                            |
+|      Site: https://devrajih.com                                           |
+| ------------------------------------------------------------------------- |
+|     Admin: Raji Samad Olawale (project admininistrator)                   |
+|   Authors: Kvngrajih (Rajiatlive) rajiatlive@gmail.com                    |
+|   Country:     Nigeria                                                    |
+| Copyright (c) 2017, Dev. Rajih All Rights Reserved.                       |                                                                                     |                                                                           |
+'---------------------------------------------------------------------------'
+*/
+
+
+//session_start();
+include "cor/session_start.php";
+include "dbconnect/database.php";
+
+
+if (isset($_POST["LOGIN"]) && $_POST["LOGIN"] == "process"){
+	$error = false;
+
+	$username = $_SESSION['username'] = mysqli_real_escape_string($connect, $_POST['username']) ;
+	$password = $_SESSION['password'] = mysqli_real_escape_string($connect, $_POST['password']) ;
+	//$username = "SELECT email FROM customers WHERE email = '$email'";
+
+
+		if (empty($username) && empty($password)){
+			$error = true;
+			$usernamerr = "Your Username/Email and Password is empty!";	
+		}else{
+			$password = md5(sha1($password)).sha1($password);
+
+			$check_manager = "SELECT username, staff_type FROM staffs WHERE (username = '$username' || email = '$username') AND password = '$password'";
+				$manager_exit = mysqli_query($connect,$check_manager);
+					$manager_result = mysqli_num_rows($manager_exit);
+
+				 	
+						if ($manager_result > 0) {
+								$row = mysqli_fetch_assoc($manager_exit);
+							if ($row['staff_type'] == 'manager') {
+								$redirect = "admin/index.php?_rdir_welcom./user_username=" .$username;
+
+								}elseif ($row['staff_type'] == 'staff') {
+									$redirect = "staff/index.php?_rdir_welcom./user_username=" .$username;
+								}
+										
+									if (isset($redirect)) {
+										$username = $_SESSION['username'];
+										header('Location: '.$redirect.'&request=login&status=success?_log_act');
+										exit();
+									}		
+						}else{
+							$error = true;
+							$usernamerr = "Invalid Username and Password";	
+						}
+
+
+		}
+}
+
+?>
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Staff :: Login</title>
+</head>
+<body>
+
+<?php
+include "include/header.php";
+?>
+
+<div class="containal">
+	
+<br><br><br><br><br><br>
+
+
+<div class="login">
+
+
+
+    <span class="welcome">Welcome To Administrator Login Page.</span>
+<br><br><br><br><br><br>
+if (isset($usernamerr)){ <div class="error"><?= $usernamerr; ?></div> <?php }
+<br><br>
+<span style="">Please Log In or <a href="register.php">Sign Up</a></span>
+
+<br><br><br>
+		<table>
+
+			<form action="<?=$_SERVER['PHP_SELF']?> " method="POST">
+				
+				<tr>
+					<td>
+					<label>Username: </label>
+						<input type="text" name="username"  id="input" placeholder="Username/Email" required="required">
+					</td>
+				</tr>
+
+				<tr>
+				
+					<td>
+					<label>Password:</label>
+						<input type="password" id="input" name="password" placeholder="password" required="required">
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						<input type="checkbox" id="checkbox" name="checkbox" style=""> Remind me password!
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						<button type="submit" id="login"  name="LOGIN" value="process">Login</button>
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<div class="forget">
+							<span> Forget Password <a href="forgetpassword.php">Click Here!</a></span>
+						</div>
+					</td>
+				</tr>
+			</form>
+
+
+		</table>
+</div>
+
+<br><br><br><br><br><br><br><br><br><br>
+
+	<?php
+	include "include/footer_e.php";
+	?>
+
+</div>
+</body>
+</html>
